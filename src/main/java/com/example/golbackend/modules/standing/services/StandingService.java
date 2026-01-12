@@ -46,9 +46,7 @@ public class StandingService {
                 return "goalDifference";
             case "GOALS_FOR":
                 return "goalsFor";
-            // Añadir más casos si tienes más criterios (HEAD_TO_HEAD es complejo y requiere lógica aparte)
             default:
-                // Por defecto, ordena por puntos si el criterio no se reconoce
                 return "points";
         }
     }
