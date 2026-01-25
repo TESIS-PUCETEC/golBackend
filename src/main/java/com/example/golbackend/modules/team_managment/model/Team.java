@@ -25,4 +25,10 @@ public class Team {
     private String logo;
     private String presidente;
     private String motto;
+
+
+    public Long getTeamId() {
+        return id;
+    }
+
 }
