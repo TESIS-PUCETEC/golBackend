@@ -1,23 +1,19 @@
 package com.example.golbackend.modules.phase_team.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class PhaseTeamDto {
+@Builder
+public class PhaseTeamResponseDto {
+    private Long phaseTeamId;
+    private Long phaseId;
 
-    @NotNull
     private Long teamId;
+    private String teamName;
 
     private String groupIdentifier;
-
-    @Min(0)
     private Integer initialPoints;
-
-    @Min(1)
     private Integer seed;
-
-    @Min(1)
     private Integer qualifiedPosition;
 }
