@@ -1,9 +1,10 @@
 package com.example.golbackend.modules.phase_team.controller;
 
 import com.example.golbackend.modules.phase_team.dto.PhaseTeamDto;
+import com.example.golbackend.modules.phase_team.dto.PhaseTeamResponseDto;
 import com.example.golbackend.modules.phase_team.model.PhaseTeam;
 import com.example.golbackend.modules.phase_team.services.PhaseTeamService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,22 +14,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/phases/{phaseId}/teams")
 public class PhaseTeamController {
-    @Autowired
-    private PhaseTeamService phaseTeamService;
+
+    private final PhaseTeamService phaseTeamService;
+
+    public PhaseTeamController(PhaseTeamService phaseTeamService) {
+        this.phaseTeamService = phaseTeamService;
+    }
 
     @PostMapping
-    public ResponseEntity<?> addTeamToPhase(@PathVariable Long phaseId, @RequestBody PhaseTeamDto phaseTeamDto) {
+    public ResponseEntity<?> addTeamToPhase(@PathVariable Long phaseId, @RequestBody PhaseTeamDto dto) {
         try {
-            PhaseTeam newPhaseTeam = phaseTeamService.addTeamToPhase(phaseId, phaseTeamDto);
-            return new ResponseEntity<>(newPhaseTeam, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body(phaseTeamService.addTeamToPhase(phaseId, dto));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+
     @GetMapping
-    public ResponseEntity<List<PhaseTeam>> getTeamsInPhase(@PathVariable Long phaseId) {
-        List<PhaseTeam> teams = phaseTeamService.getTeamsInPhase(phaseId);
-        return ResponseEntity.ok(teams);
+    public ResponseEntity<List<PhaseTeamResponseDto>> getTeamsInPhase(@PathVariable Long phaseId) {
+        return ResponseEntity.ok(phaseTeamService.getTeamsInPhase(phaseId));
     }
+
 }
