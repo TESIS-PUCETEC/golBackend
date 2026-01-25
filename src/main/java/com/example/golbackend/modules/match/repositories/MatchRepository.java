@@ -8,6 +8,14 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    List<Match> findByMatchdayMatchdayId(Long matchdayId);
-    List<Match> findByMatchdayPhasePhaseIdAndStatus(Long phaseId, String status);
+
+    List<Match> findByPhasePhaseId(Long phaseId);
+
+    List<Match> findByPhasePhaseIdAndStatus(Long phaseId, String status);
+
+    List<Match> findByPhasePhaseIdAndGroupIdentifier(Long phaseId, String groupIdentifier);
+
+    List<Match> findByPhasePhaseIdAndRoundNumber(Long phaseId, Integer roundNumber);
+
+    List<Match> findByPhasePhaseIdAndBracketCode(Long phaseId, String bracketCode);
 }

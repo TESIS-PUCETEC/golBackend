@@ -1,11 +1,14 @@
 package com.example.golbackend.modules.match.dto;
 
-
 import lombok.Data;
 
 @Data
 public class UpdateMatchResultDto {
-    private int homeGoals;
-    private int awayGoals;
+    private Integer homeScore;
+    private Integer awayScore;
+
+    private Integer homePenalties;
+    private Integer awayPenalties;
+
     private String status;
 }
