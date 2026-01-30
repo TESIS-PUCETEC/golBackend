@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/matches/{matchId}/events")
+@RequestMapping("/api/matches/{matchId}/events")
 public class MatchEventController {
+
     @Autowired
     private MatchEventService matchEventService;
 
@@ -29,5 +30,17 @@ public class MatchEventController {
     @GetMapping
     public ResponseEntity<List<MatchEvent>> getEvents(@PathVariable Long matchId) {
         return ResponseEntity.ok(matchEventService.getEventsByMatch(matchId));
+    }
+
+    @PutMapping("/{eventId}")
+    public ResponseEntity<?> updateEvent(@PathVariable Long matchId,
+                                         @PathVariable Long eventId,
+                                         @RequestBody MatchEventDto eventDto) {
+        try {
+            MatchEvent updated = matchEventService.updateMatchEvent(matchId, eventId, eventDto);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.golbackend.modules.match.controller;
 
+import com.example.golbackend.modules.match.dto.BulkCreateMatchesDto;
 import com.example.golbackend.modules.match.dto.MatchDto;
+import com.example.golbackend.modules.match.dto.MatchResponseDto;
 import com.example.golbackend.modules.match.dto.UpdateMatchResultDto;
 import com.example.golbackend.modules.match.model.Match;
 import com.example.golbackend.modules.match.services.MatchService;
@@ -12,35 +14,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/match")
+@RequestMapping("/api/matches")
 public class MatchController {
 
     @Autowired
     private MatchService matchService;
 
-    @PostMapping("/{matchdayId}/matches")
-    public ResponseEntity<?> createMatch(@PathVariable Long matchdayId, @RequestBody MatchDto matchDto) {
+    @PostMapping
+    public ResponseEntity<?> createMatch(@RequestBody MatchDto matchDto) {
+        Match newMatch = matchService.createMatch(matchDto);
+        return new ResponseEntity<>(matchService.toDto(newMatch), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/multiple")
+    public ResponseEntity<?> createMatchesBulk(@RequestBody BulkCreateMatchesDto bulkDto) {
         try {
-            Match newMatch = matchService.createMatch(matchdayId, matchDto);
-            return new ResponseEntity<>(newMatch, HttpStatus.CREATED);
+            var created = matchService.createMatchesBulk(bulkDto);
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/{matchdayId}/matches")
-    public ResponseEntity<List<Match>> getMatches(@PathVariable Long matchdayId) {
-        List<Match> matches = matchService.getMatchesByMatchday(matchdayId);
-        return ResponseEntity.ok(matches);
+
+    @GetMapping("/phase/{phaseId}")
+    public ResponseEntity<List<MatchResponseDto>> getMatchesByPhase(@PathVariable Long phaseId) {
+        return ResponseEntity.ok(
+                matchService.getMatchesByPhase(phaseId).stream().map(matchService::toDto).toList()
+        );
     }
 
-    @PutMapping("/{matchId}")
+    @PutMapping("/{matchId}/result")
     public ResponseEntity<?> updateMatchResult(@PathVariable Long matchId, @RequestBody UpdateMatchResultDto resultDto) {
-        try {
-            Match updatedMatch = matchService.updateMatchResult(matchId, resultDto);
-            return ResponseEntity.ok(updatedMatch);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        Match updated = matchService.updateMatchResult(matchId, resultDto);
+        return ResponseEntity.ok(matchService.toDto(updated));
     }
+
 }

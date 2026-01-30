@@ -1,11 +1,12 @@
 package com.example.golbackend.modules.match.model;
 
-import com.example.golbackend.modules.matchday.model.Matchday;
+import com.example.golbackend.modules.championship_managment.model.Championship;
+import com.example.golbackend.modules.phase.model.Phase;
 import com.example.golbackend.modules.team_managment.model.Team;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -17,30 +18,63 @@ public class Match {
     @Column(name = "match_id")
     private Long matchId;
 
-    @ManyToOne
-    @JoinColumn(name = "matchday_id", nullable = false)
-    private Matchday matchday;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "phase_id", nullable = false)
+    private Phase phase;
 
     @ManyToOne
-    @JoinColumn(name = "home_team_id", nullable = false)
+    @JoinColumn(name = "championship_id")
+    private Championship championship;
+
+    @ManyToOne
+    @JoinColumn(name = "home_team_id")
     private Team homeTeam;
 
     @ManyToOne
-    @JoinColumn(name = "away_team_id", nullable = false)
+    @JoinColumn(name = "away_team_id")
     private Team awayTeam;
 
-    @Column(name = "home_goals")
-    private Integer homeGoals = 0;
+    @Column(name = "home_score")
+    private Integer homeScore;
 
-    @Column(name = "away_goals")
-    private Integer awayGoals = 0;
+    @Column(name = "away_score")
+    private Integer awayScore;
+
+    @Column(name = "home_penalties")
+    private Integer homePenalties;
+
+    @Column(name = "away_penalties")
+    private Integer awayPenalties;
 
     @Column(name = "status")
-    private String status = "PENDING"; // PENDING, IN_PROGRESS, FINISHED
+    private String status = "SCHEDULED";
 
-    @Column(name = "match_time")
-    private LocalTime matchTime;
+    @Column(name = "match_date")
+    private LocalDateTime matchDate;
 
-    @Column(name = "location")
-    private String location;
+    @Column(name = "field_name")
+    private String fieldName;
+
+    @Column(name = "referee_name")
+    private String refereeName;
+
+    @Column(name = "round_number")
+    private Integer roundNumber;
+
+    @Column(name = "group_identifier")
+    private String groupIdentifier;
+
+    @Column(name = "bracket_code")
+    private String bracketCode;
+
+    @Column(name = "leg")
+    private Integer leg = 1;
+
+    @ManyToOne
+    @JoinColumn(name = "winner_goes_to_match_id")
+    private Match winnerGoesToMatch;
+
+    @ManyToOne
+    @JoinColumn(name = "loser_goes_to_match_id")
+    private Match loserGoesToMatch;
 }
