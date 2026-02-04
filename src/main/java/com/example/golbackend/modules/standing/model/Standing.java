@@ -3,11 +3,20 @@ package com.example.golbackend.modules.standing.model;
 import com.example.golbackend.modules.phase.model.Phase;
 import com.example.golbackend.modules.team_managment.model.Team;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-@Data
 @Entity
-@Table(name = "standing")
+@Table(
+        name = "standing",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uq_standing_phase_team", columnNames = {"phase_id", "team_id"})
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Standing {
 
     @Id
@@ -15,35 +24,24 @@ public class Standing {
     @Column(name = "standing_id")
     private Long standingId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "phase_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Phase phase;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "team_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Team team;
 
-    @Column(name = "matches_played")
-    private int matchesPlayed = 0;
-
-    @Column(name = "wins")
-    private int wins = 0;
-
-    @Column(name = "draws")
-    private int draws = 0;
-
-    @Column(name = "losses")
-    private int losses = 0;
-
-    @Column(name = "goals_for")
-    private int goalsFor = 0;
-
-    @Column(name = "goals_against")
-    private int goalsAgainst = 0;
-
-    @Column(name = "goal_difference")
-    private int goalDifference = 0;
-
-    @Column(name = "points")
-    private int points = 0;
+    @Builder.Default private Integer matchesPlayed = 0;
+    @Builder.Default private Integer wins = 0;
+    @Builder.Default private Integer draws = 0;
+    @Builder.Default private Integer losses = 0;
+    @Builder.Default private Integer goalsFor = 0;
+    @Builder.Default private Integer goalsAgainst = 0;
+    @Builder.Default private Integer goalDifference = 0;
+    @Builder.Default private Integer points = 0;
 }
