@@ -72,7 +72,6 @@ public class MatchService {
 
         match.setStatus("SCHEDULED");
 
-        // links (opcional)
         if (dto.getWinnerGoesToMatchId() != null) {
             Match next = matchRepository.findById(dto.getWinnerGoesToMatchId())
                     .orElseThrow(() -> new RuntimeException("Winner next match not found: " + dto.getWinnerGoesToMatchId()));
@@ -94,11 +93,9 @@ public class MatchService {
             throw new RuntimeException("matches list is required and cannot be empty");
         }
 
-        // 1) Resolver defaults
         Long defaultPhaseId = bulk.getPhaseId();
         Long defaultChampId = bulk.getChampionshipId();
 
-        // 2) Validación rápida de estructura por item
         for (int i = 0; i < bulk.getMatches().size(); i++) {
             MatchDto m = bulk.getMatches().get(i);
 
@@ -107,7 +104,6 @@ public class MatchService {
                 throw new RuntimeException("Item #" + i + " missing phaseId and no default phaseId provided");
             }
 
-            // Para eliminatoria puede venir sin equipos (placeholders)
             boolean hasAnyTeam = (m.getHomeTeamId() != null || m.getAwayTeamId() != null);
             if (hasAnyTeam) {
                 if (m.getHomeTeamId() == null || m.getAwayTeamId() == null) {
@@ -118,14 +114,9 @@ public class MatchService {
                 }
             }
 
-            // Tipo de partido (liga / grupo / eliminatoria) - no obligatorio, pero recomendado
-            // Liga: roundNumber
-            // Grupo: groupIdentifier
-            // Eliminatoria: bracketCode
-            // (Pueden venir combinados, pero normalmente NO)
+
         }
 
-        // 3) Pre-cargar Phase(s) para evitar N queries
         Set<Long> phaseIds = bulk.getMatches().stream()
                 .map(m -> m.getPhaseId() != null ? m.getPhaseId() : defaultPhaseId)
                 .collect(Collectors.toSet());
@@ -137,7 +128,6 @@ public class MatchService {
             phaseMap.put(pid, phase);
         }
 
-        // 4) Pre-cargar Team(s) (solo los que no son null)
         Set<Long> teamIds = bulk.getMatches().stream()
                 .flatMap(m -> Arrays.stream(new Long[]{m.getHomeTeamId(), m.getAwayTeamId()}))
                 .filter(Objects::nonNull)
@@ -148,7 +138,6 @@ public class MatchService {
             List<Team> teams = teamRepository.findAllById(teamIds);
             teamMap = teams.stream().collect(Collectors.toMap(Team::getId, t -> t));
 
-            // Validar faltantes
             for (Long tid : teamIds) {
                 if (!teamMap.containsKey(tid)) {
                     throw new RuntimeException("Team not found with id: " + tid);
@@ -156,7 +145,6 @@ public class MatchService {
             }
         }
 
-        // 5) Crear entidades
         List<Match> toSave = new ArrayList<>();
 
         for (int i = 0; i < bulk.getMatches().size(); i++) {
@@ -165,7 +153,6 @@ public class MatchService {
             Long phaseId = (dto.getPhaseId() != null) ? dto.getPhaseId() : defaultPhaseId;
             Phase phase = phaseMap.get(phaseId);
 
-            // championship: si viene en DTO úsalo, si no, default, si no, desde phase
             var championship = phase.getChampionship();
             if (defaultChampId != null || dto.getChampionshipId() != null) {
                 Long champId = dto.getChampionshipId() != null ? dto.getChampionshipId() : defaultChampId;
@@ -177,16 +164,13 @@ public class MatchService {
             match.setPhase(phase);
             match.setChampionship(championship);
 
-            // equipos (pueden ser null)
             if (dto.getHomeTeamId() != null) match.setHomeTeam(teamMap.get(dto.getHomeTeamId()));
             if (dto.getAwayTeamId() != null) match.setAwayTeam(teamMap.get(dto.getAwayTeamId()));
 
-            // programación
             match.setMatchDate(dto.getMatchDate());
             match.setFieldName(dto.getFieldName());
             match.setRefereeName(dto.getRefereeName());
 
-            // tipo de fase (liga/grupo/eliminatoria)
             match.setRoundNumber(dto.getRoundNumber());
             match.setGroupIdentifier(dto.getGroupIdentifier());
             match.setBracketCode(dto.getBracketCode());
@@ -194,7 +178,6 @@ public class MatchService {
 
             match.setStatus("SCHEDULED");
 
-            // links (opcional): si quieres permitir links en bulk
             if (dto.getWinnerGoesToMatchId() != null) {
                 Match next = matchRepository.findById(dto.getWinnerGoesToMatchId())
                         .orElseThrow(() -> new RuntimeException("Winner next match not found: " + dto.getWinnerGoesToMatchId()));
@@ -209,10 +192,8 @@ public class MatchService {
             toSave.add(match);
         }
 
-        // 6) Guardar todo en una sola operación (si algo falla, rollback)
         List<Match> saved = matchRepository.saveAll(toSave);
 
-        // 7) Respuesta DTO (IMPORTANTE para evitar error ByteBuddy)
         return saved.stream().map(this::toDto).toList();
     }
 
@@ -226,7 +207,6 @@ public class MatchService {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Match not found with id: " + matchId));
 
-        // Si estaba terminado, revertimos standings (solo si tiene score cargado)
         if ("FINISHED".equals(match.getStatus()) && match.getHomeScore() != null && match.getAwayScore() != null) {
             updateStandings(match, true);
         }
@@ -239,7 +219,6 @@ public class MatchService {
 
         Match saved = matchRepository.save(match);
 
-        // Aplicar standings si queda FINISHED y existe marcador
         if ("FINISHED".equals(saved.getStatus()) && saved.getHomeScore() != null && saved.getAwayScore() != null) {
             updateStandings(saved, false);
         }
@@ -253,13 +232,12 @@ public class MatchService {
         Long phaseId = phase.getPhaseId();
         Championship championship = (match.getChampionship() != null) ? match.getChampionship() : phase.getChampionship();
 
-        // Si no hay equipos (ej llaves futuras), no aplica standings
         if (match.getHomeTeam() == null || match.getAwayTeam() == null) return;
 
-        Standing homeStanding = standingRepository.findByPhase_PhaseIdAndTeam_Id(phaseId, match.getHomeTeam().getId())
+        Standing homeStanding = standingRepository.findByPhasePhaseIdAndTeam_Id(phaseId, match.getHomeTeam().getId())
                 .orElseGet(() -> createInitialStanding(phase, match.getHomeTeam()));
 
-        Standing awayStanding = standingRepository.findByPhase_PhaseIdAndTeam_Id(phaseId, match.getAwayTeam().getId())
+        Standing awayStanding = standingRepository.findByPhasePhaseIdAndTeam_Id(phaseId, match.getAwayTeam().getId())
                 .orElseGet(() -> createInitialStanding(phase, match.getAwayTeam()));
 
         int multiplier = revert ? -1 : 1;
