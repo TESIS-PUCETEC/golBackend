@@ -7,10 +7,13 @@ import com.example.golbackend.modules.match.dto.UpdateMatchResultDto;
 import com.example.golbackend.modules.match.model.Match;
 import com.example.golbackend.modules.match.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -48,6 +51,18 @@ public class MatchController {
     public ResponseEntity<?> updateMatchResult(@PathVariable Long matchId, @RequestBody UpdateMatchResultDto resultDto) {
         Match updated = matchService.updateMatchResult(matchId, resultDto);
         return ResponseEntity.ok(matchService.toDto(updated));
+    }
+
+    @GetMapping("/by-date")
+    public ResponseEntity<?> getMatchesByDateRange(
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        try {
+            return ResponseEntity.ok(matchService.getMatchesByDateRange(from, to)); 
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

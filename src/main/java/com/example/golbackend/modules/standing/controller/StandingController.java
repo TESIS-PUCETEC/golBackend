@@ -1,26 +1,27 @@
 package com.example.golbackend.modules.standing.controller;
 
+import com.example.golbackend.modules.standing.dto.StandingResponseDto;
 import com.example.golbackend.modules.standing.model.Standing;
 import com.example.golbackend.modules.standing.services.StandingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/phases/{phaseId}/standings")
+@RequestMapping("/api/phases")
 public class StandingController {
 
-    @Autowired
-    private StandingService standingService;
+    private final StandingService standingService;
 
-    @GetMapping
-    public ResponseEntity<List<Standing>> getStandings(@PathVariable Long phaseId) {
-        List<Standing> standings = standingService.getStandingsByPhase(phaseId);
-        return ResponseEntity.ok(standings);
+    public StandingController(StandingService standingService) {
+        this.standingService = standingService;
+    }
+
+
+    @PostMapping("/{phaseId}/standings/recalculate")
+    public ResponseEntity<List<StandingResponseDto>> recalculate(@PathVariable Long phaseId) {
+        List<Standing> list = standingService.recalculatePhase(phaseId);
+        return ResponseEntity.ok(list.stream().map(StandingResponseDto::from).toList());
     }
 }
