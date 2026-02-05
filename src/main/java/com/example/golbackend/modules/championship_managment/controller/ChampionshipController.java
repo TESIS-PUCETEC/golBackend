@@ -47,6 +47,7 @@ public class ChampionshipController {
         return ResponseEntity.ok(updated);
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChampionship(@PathVariable Long id) {
         championshipService.deleteChampionship(id);
