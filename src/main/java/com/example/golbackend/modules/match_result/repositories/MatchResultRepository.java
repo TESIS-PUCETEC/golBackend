@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface MatchResultRepository extends JpaRepository<MatchResult, Long> {
     Optional<MatchResult> findByMatchMatchId(Long matchId);
     boolean existsByMatchMatchId(Long matchId);
+
+
 }

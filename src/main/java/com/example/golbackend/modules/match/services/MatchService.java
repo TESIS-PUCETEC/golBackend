@@ -19,6 +19,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -324,5 +327,27 @@ public class MatchService {
                                 : null)
                 .build();
     }
+
+
+    public List<MatchResponseDto> getMatchesByDateRange(LocalDate from, LocalDate to) {
+
+        if (from == null || to == null) {
+            throw new RuntimeException("from and to are required");
+        }
+
+        if (to.isBefore(from)) {
+            throw new RuntimeException("to cannot be before from");
+        }
+
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atTime(LocalTime.MAX);
+
+        return matchRepository
+                .findByMatchDateBetweenOrderByMatchDateAsc(fromDateTime, toDateTime)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
 
 }
