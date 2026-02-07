@@ -77,4 +77,7 @@ public class Match {
     @ManyToOne
     @JoinColumn(name = "loser_goes_to_match_id")
     private Match loserGoesToMatch;
+
+    @Column(name = "matchday_number", nullable = false)
+    private Integer matchdayNumber = 1;
 }

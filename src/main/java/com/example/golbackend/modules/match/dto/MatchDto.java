@@ -22,6 +22,8 @@ public class MatchDto {
     private String bracketCode;
     private Integer leg;
 
+    private Integer matchdayNumber;
+
     private Long winnerGoesToMatchId;
     private Long loserGoesToMatchId;
 }

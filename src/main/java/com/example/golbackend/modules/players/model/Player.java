@@ -38,6 +38,9 @@ public class Player {
     @Column(name = "shirt_number")
     private Integer shirtNumber;
 
+    @Column(name = "photo_url")
+    private String photoUrl;
+
     @Column(name = "email", unique = true, length = 150)
     private String email;
 

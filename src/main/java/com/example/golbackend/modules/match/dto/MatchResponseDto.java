@@ -28,6 +28,9 @@ public class MatchResponseDto {
     private String fieldName;
     private String refereeName;
 
+        private Integer matchdayNumber;
+
+
     private Integer roundNumber;
     private String groupIdentifier;
     private String bracketCode;

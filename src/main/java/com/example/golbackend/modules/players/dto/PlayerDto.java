@@ -18,6 +18,8 @@ public class PlayerDto {
     private Integer shirtNumber;
     private String email;
 
+    private String photoUrl;
+
 
     private Player.PlayerStatus status;
 }
