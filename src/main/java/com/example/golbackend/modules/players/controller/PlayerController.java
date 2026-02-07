@@ -20,7 +20,6 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-    // Crear jugador (con teamId opcional)
     @PostMapping("/players")
     public ResponseEntity<PlayerDto> create(@Valid @RequestBody PlayerDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(playerService.createPlayer(dto));
@@ -36,13 +35,11 @@ public class PlayerController {
 
 
 
-    // Asignar jugador a un equipo
     @PutMapping("/players/{playerId}/assign/{teamId}")
     public ResponseEntity<PlayerDto> assign(@PathVariable Long playerId, @PathVariable Long teamId) {
         return ResponseEntity.ok(playerService.assignToTeam(playerId, teamId));
     }
 
-    // Liberar jugador del equipo (team_id = null + status = FREE_AGENT)
     @PutMapping("/players/{playerId}/release")
     public ResponseEntity<PlayerDto> release(@PathVariable Long playerId) {
         return ResponseEntity.ok(playerService.releaseFromTeam(playerId));

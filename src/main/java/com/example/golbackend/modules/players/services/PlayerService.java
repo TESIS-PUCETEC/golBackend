@@ -40,6 +40,9 @@ public class PlayerService {
         player.setEmail(dto.getEmail());
         player.setPosition(dto.getPosition());
         player.setShirtNumber(dto.getShirtNumber());
+        if (dto.getPhotoUrl() != null && !dto.getPhotoUrl().isBlank()) {
+            player.setPhotoUrl(dto.getPhotoUrl().trim());
+        }
 
         // Si no viene status y no tiene equipo => FREE_AGENT
         if (dto.getStatus() != null) {
@@ -111,6 +114,8 @@ public class PlayerService {
         dto.setPosition(p.getPosition());
         dto.setShirtNumber(p.getShirtNumber());
         dto.setStatus(p.getStatus());
+        dto.setPhotoUrl(p.getPhotoUrl());
+
         return dto;
     }
 }

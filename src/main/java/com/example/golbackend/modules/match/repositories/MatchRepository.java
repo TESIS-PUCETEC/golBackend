@@ -24,4 +24,6 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     List<Match> findByMatchDateBetweenOrderByMatchDateAsc(LocalDateTime from, LocalDateTime to);
 
+    List<Match> findByPhasePhaseIdAndMatchdayNumber(Long phaseId, Integer matchdayNumber);
+
 }

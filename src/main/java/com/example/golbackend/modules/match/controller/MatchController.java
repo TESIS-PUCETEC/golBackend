@@ -1,9 +1,6 @@
 package com.example.golbackend.modules.match.controller;
 
-import com.example.golbackend.modules.match.dto.BulkCreateMatchesDto;
-import com.example.golbackend.modules.match.dto.MatchDto;
-import com.example.golbackend.modules.match.dto.MatchResponseDto;
-import com.example.golbackend.modules.match.dto.UpdateMatchResultDto;
+import com.example.golbackend.modules.match.dto.*;
 import com.example.golbackend.modules.match.model.Match;
 import com.example.golbackend.modules.match.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +60,26 @@ public class MatchController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/phase/{phaseId}/matchday/{matchdayNumber}")
+    public ResponseEntity<?> getMatchesByPhaseAndMatchday(
+            @PathVariable Long phaseId,
+            @PathVariable Integer matchdayNumber
+    ) {
+        return ResponseEntity.ok(
+                matchService.getMatchesByPhaseAndMatchday(phaseId, matchdayNumber)
+        );
+    }
+
+
+    @PutMapping("/{matchId}/schedule")
+    public ResponseEntity<?> rescheduleMatch(
+            @PathVariable Long matchId,
+            @RequestBody RescheduleMatchDto dto
+    ) {
+        Match updated = matchService.rescheduleMatch(matchId, dto);
+        return ResponseEntity.ok(matchService.toDto(updated));
     }
 
 }

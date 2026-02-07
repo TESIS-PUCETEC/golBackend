@@ -2,10 +2,7 @@ package com.example.golbackend.modules.match.services;
 
 import com.example.golbackend.modules.championship_managment.model.Championship;
 import com.example.golbackend.modules.championship_managment.repositories.ChampionshipRepository;
-import com.example.golbackend.modules.match.dto.BulkCreateMatchesDto;
-import com.example.golbackend.modules.match.dto.MatchDto;
-import com.example.golbackend.modules.match.dto.MatchResponseDto;
-import com.example.golbackend.modules.match.dto.UpdateMatchResultDto;
+import com.example.golbackend.modules.match.dto.*;
 import com.example.golbackend.modules.match.model.Match;
 import com.example.golbackend.modules.match.repositories.MatchRepository;
 import com.example.golbackend.modules.matchday.model.Matchday;
@@ -72,6 +69,8 @@ public class MatchService {
         match.setGroupIdentifier(dto.getGroupIdentifier());
         match.setBracketCode(dto.getBracketCode());
         match.setLeg(dto.getLeg() != null ? dto.getLeg() : 1);
+        match.setMatchdayNumber(dto.getMatchdayNumber() != null ? dto.getMatchdayNumber() : 1);
+
 
         match.setStatus("SCHEDULED");
 
@@ -178,6 +177,8 @@ public class MatchService {
             match.setGroupIdentifier(dto.getGroupIdentifier());
             match.setBracketCode(dto.getBracketCode());
             match.setLeg(dto.getLeg() != null ? dto.getLeg() : 1);
+            match.setMatchdayNumber(dto.getMatchdayNumber() != null ? dto.getMatchdayNumber() : 1);
+
 
             match.setStatus("SCHEDULED");
 
@@ -312,6 +313,7 @@ public class MatchService {
                 .status(m.getStatus())
                 .matchDate(m.getMatchDate())
                 .fieldName(m.getFieldName())
+                .matchdayNumber(m.getMatchdayNumber())
                 .refereeName(m.getRefereeName())
                 .roundNumber(m.getRoundNumber())
                 .groupIdentifier(m.getGroupIdentifier())
@@ -328,6 +330,11 @@ public class MatchService {
                 .build();
     }
 
+
+    public List<MatchResponseDto> getMatchesByPhaseAndMatchday(Long phaseId, Integer matchdayNumber) {
+        return matchRepository.findByPhasePhaseIdAndMatchdayNumber(phaseId, matchdayNumber)
+                .stream().map(this::toDto).toList();
+    }
 
     public List<MatchResponseDto> getMatchesByDateRange(LocalDate from, LocalDate to) {
 
@@ -347,6 +354,33 @@ public class MatchService {
                 .stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+
+    @Transactional
+    public Match rescheduleMatch(Long matchId, RescheduleMatchDto dto) {
+
+        if (dto == null || dto.getMatchDate() == null) {
+            throw new RuntimeException("matchDate is required");
+        }
+
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found with id: " + matchId));
+
+        if ("FINISHED".equals(match.getStatus())) {
+            throw new RuntimeException("Cannot reschedule a FINISHED match");
+        }
+
+        match.setMatchDate(dto.getMatchDate());
+
+        if (dto.getFieldName() != null) {
+            match.setFieldName(dto.getFieldName());
+        }
+        if (dto.getRefereeName() != null) {
+            match.setRefereeName(dto.getRefereeName());
+        }
+
+        return matchRepository.save(match);
     }
 
 
